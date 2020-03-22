@@ -1,8 +1,5 @@
 Project ini dibuat dengan [Create React App](https://github.com/facebook/create-react-app).
 
-## Cara start, test dan build
-
-
 ## Cara install, start, test dan build
 
 Pada project directory, dapat dilakukan:
