@@ -10,8 +10,11 @@ class App extends Component {
     global.Server = 'https://lb7u7svcm5.execute-api.ap-southeast-1.amazonaws.com/dev/';
 
     this.state = {
-      data_ingredient:[]
+      data_ingredient:[],
+      data_checkbox:[]
     }
+
+    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
   }
 
   async componentDidMount(){
@@ -30,10 +33,48 @@ class App extends Component {
       var data = JSON.stringify(response.data).split("use-by").join("useby");
       console.log(data);
       data = JSON.parse(data);
-      self.setState({data_ingredient:data})
+      var data_checkbox = new Array(data.length).fill(false);
+      self.setState({data_ingredient:data, data_checkbox:data_checkbox})
     })
     .catch(function (error) {
       self.setState({data_ingredient:[]})
+    });
+  }
+
+  handleCheckboxChange(e){
+    var current_checkbox = this.state.data_checkbox;
+    if(e.target.checked){
+      current_checkbox[e.target.id] = true;
+      this.setState({data_checkbox:current_checkbox});
+    }else{
+      current_checkbox[e.target.id] = false;
+      this.setState({data_checkbox:current_checkbox});
+    }
+
+    var keyword="";
+    this.state.data_ingredient.map((ingredient,index) => {
+      if(this.state.data_checkbox[index]){
+        
+        keyword = keyword.concat(ingredient.title.toString(),",");
+        
+      }
+    })
+    this.getRecipes(keyword);
+  }
+
+  getRecipes(ingredients){
+    axios.get(global.Server+'recipes', 
+    { 
+      params:{ingredients:ingredients},
+    }
+    )
+    .then(function (response) {
+      
+      console.log(response.data);
+      
+    })
+    .catch(function (error) {
+      
     });
   }
 
@@ -71,13 +112,13 @@ class App extends Component {
                 {
                   this.state.data_ingredient.length > 0
                   ? 
-                  this.state.data_ingredient.map(ingredient => {
+                  this.state.data_ingredient.map((ingredient, index) => {
                     return (
-                              <div key={ingredient.title}>
+                              <div key={index}>
                                 {
                                   Date.parse(ingredient.useby) > new Date()
-                                  ? <input className="form-check-input" type="checkbox" value={ingredient.title} id={ingredient.title}/>
-                                  : <input className="form-check-input" type="checkbox" value={ingredient.title} id={ingredient.title} disabled/>
+                                  ? <input className="form-check-input" type="checkbox" value={ingredient.title} id={index} onClick={this.handleCheckboxChange}/>
+                                  : <input className="form-check-input" type="checkbox" value={ingredient.title} id={index} disabled/>
                                 }
                                 
                                 <label className="form-check-label" htmlFor={ingredient.title}>
